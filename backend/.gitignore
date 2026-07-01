@@ -1,0 +1,13 @@
+# Environment variables
+.env
+
+# Dependencies
+node_modules/
+
+# Uploads and User Data
+uploads/
+statements/
+
+# Logs
+npm-debug.log*
+yarn-error.log*
