@@ -42,7 +42,7 @@ const AppLayout = () => {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Portfolio', path: '/portfolio', icon: PieChart },
     { name: 'SIPs', path: '/sip', icon: CreditCard },
     { name: 'Nominee', path: '/nominee', icon: UserCircle },

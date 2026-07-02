@@ -14,6 +14,7 @@ import {
   Database,
   Lock,
   ArrowUpRight,
+  Sparkles,
 } from "lucide-react";
 
 const Landing = () => {
@@ -139,7 +140,7 @@ const Landing = () => {
               Pricing (Coming Soon)
             </span>
             <a
-              href="https://github.com"
+              href="https://github.com/darshan02parmar/InvestEase"
               target="_blank"
               rel="noreferrer"
               className="hover:text-teal-600 transition-colors"
@@ -169,8 +170,7 @@ const Landing = () => {
       <section className="pt-40 pb-20 px-6 lg:px-24 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
         <div className="lg:w-1/2 space-y-8 z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-700 text-xs font-bold uppercase tracking-wider">
-            <span className="text-sm">✨</span> Smart Investment Management
-            Platform
+            <Sparkles className="w-4 h-4 text-teal-600 " /> Smart Investment Management Platform
           </div>
 
           <h1 className="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight text-[#0F172A]">
@@ -567,15 +567,15 @@ const Landing = () => {
               Features
             </a>
             <a
-              href="https://github.com"
+              href="https://github.com/darshan02parmar/InvestEase"
               className="hover:text-teal-600 transition-colors"
             >
               GitHub
             </a>
-            <a href="#" className="hover:text-teal-600 transition-colors">
+            <a href="https://github.com/darshan02parmar/InvestEase/tree/main/docs" className="hover:text-teal-600 transition-colors">
               Documentation
             </a>
-            <a href="#" className="hover:text-teal-600 transition-colors">
+            <a href="https://github.com/darshan02parmar/InvestEase/issues" className="hover:text-teal-600 transition-colors">
               Contact
             </a>
           </div>
