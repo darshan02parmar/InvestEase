@@ -16,6 +16,7 @@ import Statements from './pages/Statements';
 import SIPs from './pages/SIPs';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
+import Landing from './pages/Landing';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -34,7 +36,6 @@ function App() {
                 <AppLayout />
               </ErrorBoundary>
             }>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<CommandCenter />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/support" element={<Support />} />
