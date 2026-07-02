@@ -64,10 +64,12 @@ const AppLayout = () => {
         
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center mr-3 shadow-sm">
-            <span className="text-white font-bold text-lg leading-none tracking-tighter">IE</span>
-          </div>
-          <span className="text-xl font-bold text-navy-900 tracking-tight">InvestEase</span>
+          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
+            <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+              <span className="text-white font-bold text-lg leading-none tracking-tighter">IE</span>
+            </div>
+            <span className="text-xl font-bold text-navy-900 tracking-tight">InvestEase</span>
+          </Link>
           <button 
             className="ml-auto lg:hidden text-navy-400 hover:text-navy-900"
             onClick={() => setMobileMenuOpen(false)}
