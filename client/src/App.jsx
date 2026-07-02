@@ -5,7 +5,6 @@ import AuthLayout from './layouts/AuthLayout';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 import Login from './pages/Login';
-import ComingSoon from './pages/ComingSoon';
 import CommandCenter from './pages/CommandCenter';
 import Portfolio from './pages/Portfolio';
 import Support from './pages/Support';
@@ -17,6 +16,7 @@ import Statements from './pages/Statements';
 import SIPs from './pages/SIPs';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
@@ -29,13 +29,15 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute />}>
-            <Route element={<AppLayout />}>
+            <Route element={
+              <ErrorBoundary>
+                <AppLayout />
+              </ErrorBoundary>
+            }>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<CommandCenter />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/support" element={<Support />} />
-              
-              {/* Placeholders */}
               <Route path="/sip" element={<SIPs />} />
               <Route path="/kyc" element={<KYC />} />
               <Route path="/admin" element={<Admin />} />

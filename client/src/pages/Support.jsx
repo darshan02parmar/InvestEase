@@ -1,94 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { HelpCircle, ChevronRight, MessageSquare, ArrowLeft, CheckCircle, RefreshCcw, FileText, CreditCard } from 'lucide-react';
+import { HelpCircle, ChevronRight, MessageSquare, ArrowLeft, CheckCircle, RefreshCcw, FileText, CreditCard, AlertTriangle, LifeBuoy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-
-// Decision Tree JSON
-const resolutionTree = {
-  root: {
-    question: "What do you need help with?",
-    options: [
-      { label: "My SIP Failed", next: "sip_bank_change" },
-      { label: "KYC Update", next: "kyc_issue" },
-      { label: "Nominee Addition", next: "nominee_issue" },
-      { label: "Account Statement", next: "statement_issue" },
-      { label: "Other / Speak to Agent", next: "ticket" }
-    ]
-  },
-  sip_bank_change: {
-    question: "Has your bank account changed recently?",
-    options: [
-      { label: "Yes", next: "action_update_mandate" },
-      { label: "No", next: "sip_balance" }
-    ]
-  },
-  sip_balance: {
-    question: "Is there sufficient balance in your linked account?",
-    options: [
-      { label: "Yes", next: "action_retry_payment" },
-      { label: "No", next: "action_maintain_balance" }
-    ]
-  },
-  action_update_mandate: {
-    type: "action",
-    title: "Update Your Bank Mandate",
-    message: "Since your bank account changed, your old mandate failed. Please register a new mandate.",
-    buttonText: "Go to SIPs",
-    linkTo: "/sip",
-    icon: CreditCard
-  },
-  action_retry_payment: {
-    type: "action",
-    title: "Retry Payment",
-    message: "If you have sufficient balance, it might be a temporary bank issue. You can retry the payment.",
-    buttonText: "Go to SIPs to Retry",
-    linkTo: "/sip",
-    icon: RefreshCcw,
-    ticketFallback: true // Allows them to raise a ticket if retry also fails
-  },
-  action_maintain_balance: {
-    type: "action",
-    title: "Maintain Balance",
-    message: "Please deposit funds into your linked bank account. The system will automatically retry in 2 days, or you can retry manually.",
-    buttonText: "Go to SIPs",
-    linkTo: "/sip",
-    icon: HelpCircle,
-    ticketFallback: true
-  },
-  kyc_issue: {
-    question: "What is the status of your KYC?",
-    options: [
-      { label: "Not Submitted", next: "action_submit_kyc" },
-      { label: "Rejected", next: "action_submit_kyc" },
-      { label: "Pending for over 3 days", next: "ticket" }
-    ]
-  },
-  action_submit_kyc: {
-    type: "action",
-    title: "Submit KYC Documents",
-    message: "Please navigate to the KYC section to upload your PAN, Aadhaar, and Address Proof.",
-    buttonText: "Go to KYC",
-    linkTo: "/kyc",
-    icon: FileText
-  },
-  nominee_issue: {
-    type: "action",
-    title: "Manage Nominees",
-    message: "You can easily add, edit, or remove nominees directly from your dashboard.",
-    buttonText: "Go to Nominees",
-    linkTo: "/nominee",
-    icon: HelpCircle
-  },
-  statement_issue: {
-    type: "action",
-    title: "Download Statements",
-    message: "You can generate and download monthly statements instantly without waiting for support.",
-    buttonText: "Go to Statements",
-    linkTo: "/statements",
-    icon: FileText
-  }
-};
 
 const Support = () => {
   const { user } = useAuth();
@@ -96,8 +10,8 @@ const Support = () => {
   const [loading, setLoading] = useState(true);
   
   // Wizard State
-  const [currentNodeId, setCurrentNodeId] = useState('root');
-  const [history, setHistory] = useState([]);
+  const [step, setStep] = useState(1); // 1: Select Issue, 2: Resolution, 3: Form, 4: Success Thank You
+  const [selectedIssue, setSelectedIssue] = useState('');
   
   // Ticket Form State
   const [ticketSubject, setTicketSubject] = useState('');
@@ -120,16 +34,44 @@ const Support = () => {
     }
   };
 
-  const handleOptionClick = (nextNodeId) => {
-    setHistory([...history, currentNodeId]);
-    setCurrentNodeId(nextNodeId);
-  };
-
-  const handleBack = () => {
-    const newHistory = [...history];
-    const previousNodeId = newHistory.pop();
-    setHistory(newHistory);
-    setCurrentNodeId(previousNodeId);
+  const getResolutionContent = () => {
+    switch (selectedIssue) {
+      case 'SIP Failed':
+        return {
+          title: "Verify Mandate & Account Balance",
+          message: "Most SIP failures occur due to insufficient balance or outdated bank mandates. Please ensure your linked account has sufficient funds. If you have recently changed banks, you must update your Auto SIP bank mandate.",
+          actionText: "Check SIP Status",
+          linkTo: "/sip"
+        };
+      case 'Statement Missing':
+        return {
+          title: "Download Statements Instantly",
+          message: "Account statements are generated automatically at the end of each month. You can download yours directly from the Statements panel without raising a support request.",
+          actionText: "Go to Statements",
+          linkTo: "/statements"
+        };
+      case 'KYC':
+        return {
+          title: "Check KYC Document Requirements",
+          message: "KYC verification takes up to 3 business days. If rejected, please review the admin remarks and submit clear front-and-back scans of your PAN and Aadhaar card.",
+          actionText: "Verify KYC Status",
+          linkTo: "/kyc"
+        };
+      case 'Nominee':
+        return {
+          title: "Manage Nominee Configuration",
+          message: "Adding a nominee protects your assets and raises your Investor Health Score by 20%. You can add or update nominee details dynamically.",
+          actionText: "Manage Nominees",
+          linkTo: "/nominee"
+        };
+      default:
+        return {
+          title: "General Query",
+          message: "For general queries, please review our help guides or proceed to raise a support ticket directly to speak to our operations team.",
+          actionText: "Proceed to Support",
+          linkTo: "#"
+        };
+    }
   };
 
   const submitTicket = async (e) => {
@@ -138,18 +80,19 @@ const Support = () => {
     
     try {
       await api.post('/support', {
-        subject: ticketSubject || 'Support Request via Assistant',
+        subject: ticketSubject || `${selectedIssue} Issue`,
         message: ticketMessage
       });
       setSuccess(true);
       fetchRequests();
+      setStep(4);
       // Reset after 3 seconds
       setTimeout(() => {
         setSuccess(false);
         setTicketMessage('');
         setTicketSubject('');
-        setCurrentNodeId('root');
-        setHistory([]);
+        setSelectedIssue('');
+        setStep(1);
       }, 3000);
     } catch (err) {
       console.error(err);
@@ -159,174 +102,239 @@ const Support = () => {
     }
   };
 
-  const renderWizardNode = () => {
-    if (currentNodeId === 'ticket') {
-      return (
-        <div className="space-y-4 animate-fadeIn">
-          <h3 className="text-lg font-semibold text-navy-900 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-teal-600" />
-            Raise a Support Ticket
-          </h3>
-          <p className="text-sm text-navy-600">Our team will get back to you within 24 hours.</p>
-          
-          {success ? (
-            <div className="bg-green-50 text-green-700 p-6 rounded-lg text-center flex flex-col items-center">
-              <CheckCircle className="w-12 h-12 mb-3" />
-              <p className="font-bold">Ticket Submitted Successfully!</p>
-              <p className="text-sm mt-1">Check the table below for updates.</p>
-            </div>
-          ) : (
-            <form onSubmit={submitTicket} className="space-y-4 mt-4">
-              <div>
-                <label className="block text-sm font-medium text-navy-700 mb-1">Subject</label>
-                <input 
-                  type="text" 
-                  value={ticketSubject}
-                  onChange={(e) => setTicketSubject(e.target.value)}
-                  className="input-field" 
-                  required 
-                  placeholder="e.g. Need help with manual KYC"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-navy-700 mb-1">Message</label>
-                <textarea 
-                  value={ticketMessage}
-                  onChange={(e) => setTicketMessage(e.target.value)}
-                  className="input-field min-h-[100px]" 
-                  required 
-                  placeholder="Describe your issue in detail..."
-                />
-              </div>
-              <button type="submit" disabled={submitting} className="btn-primary w-full">
-                {submitting ? 'Submitting...' : 'Submit Ticket'}
-              </button>
-            </form>
-          )}
-        </div>
-      );
-    }
-
-    const node = resolutionTree[currentNodeId];
-
-    if (node.type === 'action') {
-      const ActionIcon = node.icon || HelpCircle;
-      return (
-        <div className="animate-fadeIn text-center py-6">
-          <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ActionIcon className="w-8 h-8 text-teal-600" />
-          </div>
-          <h3 className="text-xl font-bold text-navy-900 mb-2">{node.title}</h3>
-          <p className="text-navy-600 mb-6 max-w-sm mx-auto">{node.message}</p>
-          
-          <div className="flex flex-col gap-3">
-            <Link to={node.linkTo} className="btn-primary inline-block">
-              {node.buttonText}
-            </Link>
-            
-            {node.ticketFallback && (
-              <button onClick={() => setCurrentNodeId('ticket')} className="text-sm text-navy-500 hover:text-navy-700 underline mt-4">
-                Did this not solve your problem? Raise a ticket.
-              </button>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="animate-fadeIn">
-        <h3 className="text-lg font-semibold text-navy-900 mb-6 text-center">{node.question}</h3>
-        <div className="space-y-3">
-          {node.options.map((option, idx) => (
-            <button 
-              key={idx}
-              onClick={() => handleOptionClick(option.next)}
-              className="w-full text-left px-4 py-4 rounded-xl border border-navy-200 hover:border-teal-500 hover:bg-teal-50 transition-colors flex justify-between items-center group bg-white shadow-sm"
-            >
-              <span className="font-medium text-navy-800 group-hover:text-teal-700">{option.label}</span>
-              <ChevronRight className="w-5 h-5 text-navy-300 group-hover:text-teal-600" />
-            </button>
-          ))}
-        </div>
-      </div>
-    );
+  const handleReset = () => {
+    setSelectedIssue('');
+    setTicketSubject('');
+    setTicketMessage('');
+    setStep(1);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div className="animate-pulse space-y-6">
+      <div className="h-10 bg-gray-200 w-1/4 rounded"></div>
+      <div className="h-64 bg-gray-200 rounded-3xl"></div>
+    </div>
+  );
+
+  const resolution = getResolutionContent();
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12 bg-[#F5F7FB]">
       <div>
-        <h1 className="text-2xl font-bold text-navy-900">Guided Resolution Center</h1>
-        <p className="text-navy-500">Find immediate solutions or raise a ticket with our support team.</p>
+        <h1 className="text-2xl font-outfit font-bold text-navy-900">Guided Resolution Center</h1>
+        <p className="text-navy-500 text-sm">Resolve issues instantly using our smart self-service assistant.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* Guided Assistant Panel */}
-        <div className="card shadow-md border-teal-100 bg-gradient-to-b from-white to-navy-50/30">
-          <div className="flex items-center justify-between mb-6 border-b border-navy-100 pb-4">
-            <h2 className="font-bold text-navy-900 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-teal-600" />
-              Smart Assistant
+        {/* Guided Assistant Panel (Strict Wizard Flow) */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+            <h2 className="font-bold text-navy-900 flex items-center gap-2 font-outfit">
+              <LifeBuoy className="w-5 h-5 text-teal-600 animate-spin" style={{ animationDuration: '3s' }} />
+              Guided Resolution Wizard
             </h2>
-            {currentNodeId !== 'root' && (
-              <button onClick={handleBack} className="text-sm text-navy-500 hover:text-navy-900 flex items-center gap-1 font-medium">
-                <ArrowLeft className="w-4 h-4" /> Back
+            {step > 1 && step < 4 && (
+              <button 
+                onClick={() => setStep(step - 1)}
+                className="text-xs text-navy-500 hover:text-navy-900 flex items-center gap-1 font-bold"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Back
               </button>
             )}
           </div>
           
           <div className="min-h-[300px] flex flex-col justify-center">
-            {renderWizardNode()}
+            
+            {/* Step 1: Select Issue */}
+            {step === 1 && (
+              <div className="space-y-6 animate-fade-in">
+                <h3 className="text-base font-bold text-navy-900 font-outfit">What issue are you facing?</h3>
+                <div className="space-y-3">
+                  {['SIP Failed', 'Statement Missing', 'KYC', 'Nominee'].map(issue => (
+                    <label 
+                      key={issue}
+                      className={`flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer bg-white ${
+                        selectedIssue === issue 
+                          ? 'border-teal-500 bg-teal-50/30 ring-2 ring-teal-500/20' 
+                          : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <input 
+                        type="radio" 
+                        name="issueType" 
+                        value={issue}
+                        checked={selectedIssue === issue}
+                        onChange={() => setSelectedIssue(issue)}
+                        className="w-4.5 h-4.5 text-teal-600 focus:ring-teal-500 border-gray-300"
+                      />
+                      <span className="text-sm font-semibold text-navy-800">{issue}</span>
+                    </label>
+                  ))}
+                </div>
+                
+                <button
+                  disabled={!selectedIssue}
+                  onClick={() => setStep(2)}
+                  className="w-full btn-primary py-3 rounded-2xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-2"
+                >
+                  Continue <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Step 2: Suggested Resolution */}
+            {step === 2 && (
+              <div className="space-y-6 animate-fade-in text-center py-4">
+                <div className="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-2 text-teal-600">
+                  <Zap className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-navy-900 font-outfit">{resolution.title}</h3>
+                  <p className="text-xs font-medium text-navy-500 mt-1 uppercase tracking-widest">Suggested Resolution</p>
+                </div>
+                <p className="text-sm text-navy-600 leading-relaxed max-w-sm mx-auto bg-gray-50 p-4 rounded-2xl border border-gray-100/50">
+                  {resolution.message}
+                </p>
+                
+                <div className="flex flex-col gap-3 max-w-sm mx-auto">
+                  {selectedIssue !== 'General' && (
+                    <Link to={resolution.linkTo} className="btn-primary py-2.5 rounded-xl font-bold flex items-center justify-center gap-2">
+                      {resolution.actionText} <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  )}
+                  
+                  <div className="pt-4 border-t border-gray-100 mt-2">
+                    <p className="text-xs font-bold text-navy-900 mb-3">Resolved?</p>
+                    <div className="flex gap-4 justify-center">
+                      <button 
+                        onClick={() => setStep(4)} 
+                        className="px-6 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        Yes, Resolved
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setTicketSubject(`${selectedIssue} Resolution Failed`);
+                          setStep(3);
+                        }} 
+                        className="px-6 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        No, Raise Support Ticket
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Raise Support Request Form */}
+            {step === 3 && (
+              <div className="space-y-4 animate-fade-in">
+                <div>
+                  <h3 className="text-base font-bold text-navy-900 font-outfit">Raise Support Request</h3>
+                  <p className="text-xs text-navy-500 mt-0.5">Please provide specific details to help our team assist you quickly.</p>
+                </div>
+                
+                <form onSubmit={submitTicket} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-navy-700 uppercase mb-1">Subject</label>
+                    <input 
+                      type="text" 
+                      value={ticketSubject}
+                      onChange={(e) => setTicketSubject(e.target.value)}
+                      className="input-field py-2.5 rounded-xl" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-navy-700 uppercase mb-1">Message</label>
+                    <textarea 
+                      value={ticketMessage}
+                      onChange={(e) => setTicketMessage(e.target.value)}
+                      className="input-field min-h-[100px] py-2.5 rounded-xl" 
+                      required 
+                      placeholder="Describe your issue in detail..."
+                    />
+                  </div>
+                  <button type="submit" disabled={submitting} className="btn-primary w-full py-2.5 rounded-xl font-bold">
+                    {submitting ? 'Submitting...' : 'Submit Support Request'}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* Step 4: Success Thank You */}
+            {step === 4 && (
+              <div className="text-center py-8 space-y-4 animate-fade-in">
+                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 border border-emerald-100">
+                  <CheckCircle className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-navy-900 font-outfit">Thank You!</h3>
+                  <p className="text-sm text-navy-600 max-w-xs mx-auto">
+                    {success 
+                      ? "Your support ticket has been submitted. Our operations team will respond shortly." 
+                      : "We're glad we could help you resolve this issue immediately."
+                    }
+                  </p>
+                </div>
+                <button 
+                  onClick={handleReset} 
+                  className="text-xs font-bold text-teal-600 hover:underline pt-4"
+                >
+                  Start New Query
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
 
         {/* Previous Tickets Panel */}
-        <div className="card p-0 overflow-hidden flex flex-col h-full">
-          <div className="p-6 border-b border-navy-100 bg-navy-50/50">
-            <h3 className="text-lg font-semibold text-navy-900 flex items-center gap-2">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-0 overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow duration-300">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="text-base font-bold text-navy-900 flex items-center gap-2 font-outfit">
               <MessageSquare className="w-5 h-5 text-navy-400" />
               Your Support Tickets
             </h3>
           </div>
           
           {requests.length === 0 ? (
-            <div className="p-8 text-center text-navy-500 flex-1 flex flex-col justify-center">
-              <p>You haven't raised any tickets yet.</p>
+            <div className="p-8 text-center text-navy-500 flex-1 flex flex-col justify-center min-h-[300px]">
+              <p className="text-sm font-medium">You haven't raised any tickets yet.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-navy-50 text-navy-600 text-sm">
+                <thead className="bg-gray-50 text-navy-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-3 font-medium">Subject</th>
-                    <th className="px-6 py-3 font-medium">Status</th>
-                    <th className="px-6 py-3 font-medium">Date</th>
+                    <th className="px-6 py-3">Subject</th>
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-navy-100 text-sm">
+                <tbody className="divide-y divide-gray-100 text-xs font-semibold">
                   {requests.map((req) => (
-                    <tr key={req._id} className="hover:bg-navy-50/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-navy-900">
+                    <tr key={req._id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-navy-900">
                         {req.subject}
                         {req.adminResponse && (
-                          <div className="mt-2 text-xs bg-teal-50 text-teal-800 p-2 rounded border border-teal-100">
+                          <div className="mt-2 text-xs bg-teal-50 text-teal-800 p-3 rounded-xl border border-teal-100/50 font-medium">
                             <strong>Response:</strong> {req.adminResponse}
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          req.status === 'Resolved' ? 'bg-green-100 text-green-700' :
-                          req.status === 'Open' ? 'bg-orange-100 text-orange-700' :
-                          'bg-blue-100 text-blue-700'
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                          req.status === 'Resolved' ? 'bg-emerald-50 text-emerald-700' :
+                          req.status === 'Open' ? 'bg-amber-50 text-amber-700' :
+                          'bg-blue-50 text-blue-700'
                         }`}>
                           {req.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-navy-600 whitespace-nowrap">
+                      <td className="px-6 py-4 text-navy-400 whitespace-nowrap font-mono">
                         {new Date(req.createdAt).toLocaleDateString()}
                       </td>
                     </tr>

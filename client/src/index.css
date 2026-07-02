@@ -10,7 +10,7 @@
   --color-navy-600: #475569;
   --color-navy-700: #334155;
   --color-navy-800: #1E293B;
-  --color-navy-900: #111827;
+  --color-navy-900: #0F172A; /* Deep Navy */
 
   --color-teal-50: #F0FDFA;
   --color-teal-100: #CCFBF1;
@@ -22,11 +22,24 @@
   --color-teal-700: #0F766E;
   --color-teal-800: #115E59;
   --color-teal-900: #134E4A;
+
+  --color-emerald-500: #10B981;
+  --color-amber-500: #F59E0B;
+  --color-rose-500: #EF4444;
+
+  --color-app-bg: #F5F7FB;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 @layer base {
   body {
-    @apply bg-navy-50 text-navy-900 font-sans antialiased;
+    @apply bg-[var(--color-app-bg)] text-navy-900 font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-outfit tracking-tight;
   }
 }
 

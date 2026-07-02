@@ -62,6 +62,15 @@ const seedData = async () => {
       }
     });
 
+    const Investment = require('../models/Investment');
+    await Investment.deleteMany();
+    await Investment.insertMany([
+      { userId: demoUser._id, fundName: 'Axis Bluechip Equity Fund', type: 'Equity', amount: 120000, units: 150.5, currentValue: 150000 },
+      { userId: demoUser._id, fundName: 'HDFC Liquid Fund', type: 'Liquid', amount: 45000, units: 45.2, currentValue: 50000 },
+      { userId: demoUser._id, fundName: 'SBI Debt Fund', type: 'Debt', amount: 140000, units: 140.0, currentValue: 150000 },
+      { userId: demoUser._id, fundName: 'Mirae Asset Large Cap', type: 'Equity', amount: 100000, units: 100.8, currentValue: 150000 }
+    ]);
+
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     const lastMonth = new Date();
