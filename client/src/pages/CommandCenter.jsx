@@ -111,15 +111,12 @@ const CommandCenter = () => {
   }, [data]);
 
   const completedCount = data?.onboarding
-    ? (data.onboarding.name ? 1 : 0) +
-      (data.onboarding.email ? 1 : 0) +
-      (data.onboarding.phone ? 1 : 0) +
-      (data.onboarding.kycCompleted ? 1 : 0) +
+    ? (data.onboarding.kycCompleted ? 1 : 0) +
       (data.onboarding.nomineeAdded ? 1 : 0) +
       (data.onboarding.investmentAdded ? 1 : 0) +
       (data.onboarding.sipCreated ? 1 : 0)
     : 0;
-  const percentComplete = Math.round((completedCount / 7) * 100);
+  const percentComplete = Math.round((completedCount / 4) * 100);
 
   const diversificationScore = useMemo(() => {
     if (!data?.portfolio?.allocation) return 0;
@@ -214,7 +211,7 @@ const CommandCenter = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2 font-outfit">
-                  <Zap className="w-5 h-5 text-amber-500 animate-bounce" />
+                  <Zap className="w-5 h-5 text-amber-500 " />
                   Welcome to InvestEase! Let's get you set up 👋
                 </h3>
                 <p className="text-xs text-navy-500">Complete these simple steps to secure your account and start building wealth.</p>
