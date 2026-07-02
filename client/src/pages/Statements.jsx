@@ -1,13 +1,32 @@
 import { useState, useEffect } from 'react';
 import { FileText, Download, AlertCircle } from 'lucide-react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Statements = () => {
+  const { user } = useAuth();
   const [statements, setStatements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
-  
+
+  const handleDownload = async (stmt) => {
+    try {
+      const response = await api.get(`/statements/download/${stmt._id}`, {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `InvestEase-Statement-${stmt.month}-${stmt.year}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error('Download failed', error);
+      alert('Failed to download the statement.');
+    }
+  };
   const currentYear = new Date().getFullYear();
   const [selectedMonth, setSelectedMonth] = useState('January');
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
@@ -146,14 +165,12 @@ const Statements = () => {
                           {new Date(stmt.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <a 
-                            href={`http://localhost:5000/${stmt.pdfUrl.replace('\\', '/')}`} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-800 font-medium bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors"
+                          <button 
+                            onClick={() => handleDownload(stmt)}
+                            className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-800 font-medium bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                           >
                             <Download className="w-4 h-4" /> View / Download
-                          </a>
+                          </button>
                         </td>
                       </tr>
                     ))}
