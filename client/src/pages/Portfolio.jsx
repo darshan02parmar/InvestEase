@@ -60,6 +60,37 @@ const Portfolio = () => {
     }
   };
 
+  const handleDownloadReport = () => {
+    if (!data || !data.investments || data.investments.length === 0) {
+      alert("No investments available to download.");
+      return;
+    }
+
+    const headers = ['Fund Name', 'Asset Class', 'Invested Amount (Rs)', 'Units', 'Current Value (Rs)'];
+    
+    const csvRows = [
+      headers.join(','),
+      ...data.investments.map(inv => [
+        `"${inv.fundName}"`,
+        inv.type,
+        inv.amount,
+        inv.units,
+        inv.currentValue
+      ].join(','))
+    ];
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `InvestEase_Portfolio_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
@@ -112,7 +143,10 @@ const Portfolio = () => {
           >
             + Add Investment
           </button>
-          <button className="btn-secondary flex items-center gap-2 py-2.5 px-5 rounded-2xl font-bold text-sm">
+          <button 
+            onClick={handleDownloadReport}
+            className="btn-secondary flex items-center gap-2 py-2.5 px-5 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-colors"
+          >
             <Download className="w-4 h-4" /> Download Report
           </button>
         </div>
