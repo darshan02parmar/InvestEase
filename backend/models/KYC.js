@@ -10,7 +10,10 @@ const kycSchema = new mongoose.Schema({
     enum: ['Pending', 'Under Review', 'Approved', 'Rejected'],
     default: 'Pending'
   },
-  remarks: { type: String }
+  remarks: { type: String },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  reviewedAt: { type: Date },
+  rejectionReason: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('KYC', kycSchema);

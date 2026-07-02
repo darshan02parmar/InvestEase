@@ -2,9 +2,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
+const generateToken = (id, role) => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+    expiresIn: '7d',
   });
 };
 
@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
         mobile: user.mobile,
         kycStatus: user.kycStatus,
         role: user.role,
-        token: generateToken(user._id),
+        token: generateToken(user._id, user.role),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -60,7 +60,7 @@ const loginUser = async (req, res) => {
         mobile: user.mobile,
         kycStatus: user.kycStatus,
         role: user.role,
-        token: generateToken(user._id),
+        token: generateToken(user._id, user.role),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -108,7 +108,7 @@ const updateUserProfile = async (req, res) => {
       mobile: updatedUser.mobile,
       kycStatus: updatedUser.kycStatus,
       role: updatedUser.role,
-      token: generateToken(updatedUser._id),
+      token: generateToken(updatedUser._id, updatedUser.role),
     });
   } else {
     res.status(404).json({ message: 'User not found' });

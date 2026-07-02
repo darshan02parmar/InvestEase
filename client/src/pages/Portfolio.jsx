@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Filter, Download, ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
 import api from '../services/api';
@@ -28,11 +28,11 @@ const Portfolio = () => {
 
   const { portfolio, investments } = data;
 
-  const chartData = [
+  const chartData = useMemo(() => [
     { name: 'Equity', value: portfolio.allocation.equity, color: '#0F766E' },
     { name: 'Debt', value: portfolio.allocation.debt, color: '#6366F1' },
     { name: 'Liquid', value: portfolio.allocation.liquid, color: '#F59E0B' }
-  ];
+  ], [portfolio.allocation]);
 
   const filteredInvestments = filter === 'All' 
     ? investments 

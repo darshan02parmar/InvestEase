@@ -6,16 +6,29 @@ const Notification = require('../models/Notification');
 const Request = require('../models/Request');
 const { calculateHealthScore } = require('../services/healthScoreService');
 
+const dashboardCache = new Map();
+
 const getDashboardData = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const portfolio = await Portfolio.findOne({ userId });
-    const sips = await SIP.find({ userId });
-    const user = await User.findById(userId);
+    // 10-second TTL Cache lookup
+    const cached = dashboardCache.get(userId.toString());
+    if (cached && Date.now() - cached.timestamp < 10000) {
+      return res.json(cached.data);
+    }
+
+    // Run lookups concurrently using Promise.all & lean() for speed
+    const [portfolio, sips, user, nominees, unreadNotifications] = await Promise.all([
+      Portfolio.findOne({ userId }).lean(),
+      SIP.find({ userId }).lean(),
+      User.findById(userId).lean(),
+      Nominee.find({ userId: req.user._id }).lean(),
+      Notification.countDocuments({ userId, read: false })
+    ]);
 
     const portfolioSnapshot = portfolio || { totalValue: 0, todayChange: 0, allocation: { equity: 0, debt: 0, liquid: 0 } };
-    const healthScore = calculateHealthScore(req.user, sips, await Nominee.find({ userId }));
+    const healthScore = calculateHealthScore(req.user, sips, nominees);
 
     const sipDetails = {
       totalActiveSIPs: sips.filter(s => s.status === 'Active').length,
@@ -38,7 +51,6 @@ const getDashboardData = async (req, res) => {
     }
 
     // Nominee Insight
-    const nominees = await Nominee.find({ userId: req.user._id });
     if (nominees.length === 0) {
       insights.push({
         type: 'warning',
@@ -70,7 +82,6 @@ const getDashboardData = async (req, res) => {
     }
 
     // Notifications Insight
-    const unreadNotifications = await Notification.countDocuments({ userId: req.user._id, read: false });
     if (unreadNotifications > 0) {
       insights.push({
         type: 'info',
@@ -88,18 +99,23 @@ const getDashboardData = async (req, res) => {
       link: '/statements'
     });
 
-    const recentActivity = await Notification.find({ userId }).sort({ createdAt: -1 }).limit(5);
+    const recentActivity = await Notification.find({ userId }).sort({ createdAt: -1 }).limit(5).lean();
 
     const nextSip = sips.find(s => s.status === 'Active') || null;
 
-    res.json({
+    const dashboardData = {
       portfolio: portfolioSnapshot,
       nextSip,
       kycStatus: user.kycStatus,
       healthScore,
       recentActivity,
       insights
-    });
+    };
+
+    // Store in cache
+    dashboardCache.set(userId.toString(), { timestamp: Date.now(), data: dashboardData });
+
+    res.json(dashboardData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
