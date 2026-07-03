@@ -13,28 +13,6 @@ const AppLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [adminBadgeCount, setAdminBadgeCount] = useState(0);
-
-  useEffect(() => {
-    if (user?.role === 'admin') {
-      const fetchBadgeCount = async () => {
-        try {
-          const [kycRes, supportRes] = await Promise.all([
-            api.get('/kyc/admin/pending'),
-            api.get('/support/admin/tickets')
-          ]);
-          const pendingKycCount = kycRes.data.length;
-          const openTicketsCount = supportRes.data.filter(t => t.status === 'Open').length;
-          setAdminBadgeCount(pendingKycCount + openTicketsCount);
-        } catch (err) {
-          console.error('Error fetching admin count:', err);
-        }
-      };
-      fetchBadgeCount();
-      const interval = setInterval(fetchBadgeCount, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -100,11 +78,6 @@ const AppLayout = () => {
                 )}
                 <Icon className={`w-5 h-5 mr-3 transition-colors ${isActive ? 'text-teal-600' : 'text-navy-400 group-hover:text-navy-600'}`} />
                 <span className="flex-1 text-left">{item.name}</span>
-                {item.name === 'Admin Panel' && adminBadgeCount > 0 && (
-                  <span className="ml-auto bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse shadow-sm">
-                    {adminBadgeCount}
-                  </span>
-                )}
               </Link>
             );
           })}
