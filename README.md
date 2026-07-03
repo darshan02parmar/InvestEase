@@ -90,15 +90,15 @@ Password: Admin@123
 
 | Landing Page | Investor Dashboard |
 |---|---|
-| ![Landing page](./docs/screenshots/landing.png) | ![Dashboard](./docs/screenshots/dashboard.png) |
+| ![Landing page](./client/public/Screenshots/landingpage.png) | ![Dashboard](./client/public/Screenshots/Dashboard-panel.png) |
 
 | Portfolio | SIPs |
 |---|---|
-| ![Portfolio](./docs/screenshots/portfolio.png) | ![SIPs](./docs/screenshots/sips.png) |
+| ![Portfolio](./client/public/Screenshots/portfolio.png) | ![SIPs](./client/public/Screenshots/SIPs.png) |
 
 | KYC | Admin Dashboard |
 |---|---|
-| ![KYC](./docs/screenshots/kyc.png) | ![Admin dashboard](./docs/screenshots/admin.png) |
+| ![KYC](./client/public/Screenshots/KYC.png) | ![Admin dashboard](./client/public/Screenshots/Admin.png) |
 
 <div align="right"><a href="./docs/PROJECT_DOCUMENTATION.md#screenshots">More screenshots →</a></div>
 
