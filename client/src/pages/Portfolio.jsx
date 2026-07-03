@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Filter, Download, ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
+import { Filter, Download, ArrowUpRight, ArrowDownRight, TrendingUp, X, ArrowRight } from 'lucide-react';
 import api from '../services/api';
 import { TableSkeleton } from '../components/SkeletonLoader';
 
@@ -10,6 +10,7 @@ const Portfolio = () => {
   const [filter, setFilter] = useState('All');
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [isRebalanceModalOpen, setIsRebalanceModalOpen] = useState(false);
   const [buyFormData, setBuyFormData] = useState({
     fundName: 'SBI Bluechip Fund',
     type: 'Equity',
@@ -120,6 +121,37 @@ const Portfolio = () => {
     ];
   }, [data]);
 
+  const marketOutlook = useMemo(() => {
+    if (!data?.portfolio?.allocation) return null;
+    const { equity, debt, liquid } = data.portfolio.allocation;
+    
+    if (equity > 70) {
+      return {
+        title: "Growth Focus",
+        message: `Your portfolio has a high equity allocation (${equity}%). Consider adding some debt exposure if your investment horizon is short.`,
+        target: { equity: 60, debt: 30, liquid: 10 }
+      };
+    } else if (debt > 60) {
+      return {
+        title: "Conservative Focus",
+        message: `Your portfolio is conservative with high debt exposure (${debt}%). Increasing equity exposure may improve long-term growth.`,
+        target: { equity: 50, debt: 40, liquid: 10 }
+      };
+    } else if (liquid > 30) {
+      return {
+        title: "Idle Capital",
+        message: `Most of your money is parked in Liquid funds (${liquid}%). Consider investing a portion into Equity or Debt based on your goals.`,
+        target: { equity: 60, debt: 30, liquid: 10 }
+      };
+    } else {
+      return {
+        title: "Balanced Portfolio",
+        message: "Your portfolio is well diversified across Equity, Debt, and Liquid funds. No immediate rebalancing is recommended.",
+        target: { equity, debt, liquid }
+      };
+    }
+  }, [data]);
+
   if (loading) return <TableSkeleton />;
   if (!data) return <div className="text-center p-8 text-navy-500">Failed to load portfolio.</div>;
 
@@ -204,15 +236,20 @@ const Portfolio = () => {
           </div>
         </div>
 
-        <div className="card lg:col-span-1 bg-gradient-to-br from-navy-900 to-navy-800 text-white">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-white/10 rounded-lg"><TrendingUp className="w-5 h-5 text-teal-400" /></div>
-            <h3 className="font-bold text-lg">Market Outlook</h3>
+        <div className="card lg:col-span-1 bg-gradient-to-br from-navy-900 to-navy-800 text-white flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-white/10 rounded-lg"><TrendingUp className="w-5 h-5 text-teal-400" /></div>
+              <h3 className="font-bold text-lg">{marketOutlook?.title || 'Market Outlook'}</h3>
+            </div>
+            <p className="text-sm text-navy-200 mb-6 leading-relaxed">
+              {marketOutlook?.message || 'Analyzing your portfolio...'}
+            </p>
           </div>
-          <p className="text-sm text-navy-200 mb-6 leading-relaxed">
-            Your portfolio is heavily weighted in Equity (60%). Consider rebalancing slightly into Debt funds if you are approaching a short-term financial goal to reduce volatility.
-          </p>
-          <button className="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-bold transition-colors">
+          <button 
+            onClick={() => setIsRebalanceModalOpen(true)}
+            className="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-bold transition-colors"
+          >
             View Rebalancing Options
           </button>
         </div>
@@ -373,6 +410,72 @@ const Portfolio = () => {
                 {buying ? 'Processing Purchase...' : 'Confirm & Buy Mutual Fund'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Rebalance Modal */}
+      {isRebalanceModalOpen && marketOutlook && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-900/40 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold font-outfit text-navy-900">Rebalancing Strategy</h2>
+                <p className="text-sm text-navy-500 mt-1">Target allocation based on your profile.</p>
+              </div>
+              <button 
+                onClick={() => setIsRebalanceModalOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-navy-400 hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <p className="text-xs font-bold text-navy-400 uppercase tracking-wider mb-2">Asset</p>
+                  <div className="space-y-4">
+                    <p className="text-sm font-bold text-navy-900">Equity</p>
+                    <p className="text-sm font-bold text-navy-900">Debt</p>
+                    <p className="text-sm font-bold text-navy-900">Liquid</p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-bold text-navy-400 uppercase tracking-wider mb-2">Current</p>
+                  <div className="space-y-4">
+                    <p className="text-sm font-mono font-medium text-navy-600">{data?.portfolio?.allocation?.equity || 0}%</p>
+                    <p className="text-sm font-mono font-medium text-navy-600">{data?.portfolio?.allocation?.debt || 0}%</p>
+                    <p className="text-sm font-mono font-medium text-navy-600">{data?.portfolio?.allocation?.liquid || 0}%</p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-2">Target</p>
+                  <div className="space-y-4">
+                    <p className="text-sm font-mono font-bold text-teal-600">{marketOutlook.target.equity}%</p>
+                    <p className="text-sm font-mono font-bold text-teal-600">{marketOutlook.target.debt}%</p>
+                    <p className="text-sm font-mono font-bold text-teal-600">{marketOutlook.target.liquid}%</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-6 border-t border-gray-100 flex gap-3">
+                <button 
+                  onClick={() => setIsRebalanceModalOpen(false)}
+                  className="flex-1 py-3 text-sm font-bold text-navy-600 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-colors"
+                >
+                  Dismiss
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsRebalanceModalOpen(false);
+                    setShowBuyModal(true);
+                  }}
+                  className="flex-1 py-3 text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-2xl transition-colors flex items-center justify-center gap-2"
+                >
+                  Start Rebalancing <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
