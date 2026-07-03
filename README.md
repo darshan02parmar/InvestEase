@@ -31,9 +31,9 @@ InvestEase moves a set of repetitive investor support tasks — statement downlo
 
 It's built as a demonstration of practical full-stack architecture: JWT authentication, role-based access control, a normalized MongoDB schema, a documented REST API, and a responsive React frontend.
 
-> This is a portfolio/demo project. It does not connect to real mutual fund APIs, bank accounts, or live market data — all investment data is illustrative. See [design decisions](./docs/PROJECT_DOCUMENTATION.md#design-decisions) for why.
+> This is a portfolio/demo project. It does not connect to real mutual fund APIs, bank accounts, or live market data — all investment data is illustrative.
 
-For the deep technical reference — full API docs, complete schema, sequence diagrams, and design rationale — see **[docs/PROJECT_DOCUMENTATION.md](./docs/PROJECT_DOCUMENTATION.md)**.
+For the deep technical reference — full API docs, complete schema, and architecture overview — see the **[docs/](./docs/)** folder.
 
 <details>
 <summary><strong>Table of contents</strong></summary>
@@ -118,7 +118,7 @@ JWT authentication with bcrypt password hashing · Role-based access control · 
 <details>
 <summary><strong>What's dynamic vs. rule-based</strong></summary>
 
-Authentication, all CRUD operations (Portfolio, Investments, SIP, Nominee, KYC, Statements), and notifications are backed by real MongoDB data and change as the user acts. The Investor Health Score, market outlook, and portfolio insights are deterministic rule-based logic — not AI. Full explanation: [Dynamic vs. Rule-Based Features](./docs/PROJECT_DOCUMENTATION.md#dynamic-vs-rule-based-features).
+Authentication, all CRUD operations (Portfolio, Investments, SIP, Nominee, KYC, Statements), and notifications are backed by real MongoDB data and change as the user acts. The Investor Health Score, market outlook, and portfolio insights are deterministic rule-based logic — not AI.
 
 </details>
 
@@ -127,7 +127,7 @@ Authentication, all CRUD operations (Portfolio, Investments, SIP, Nominee, KYC, 
 ## Highlights
 
 **Investor Health Score**
-A rule-based score summarizing account health — KYC status, active SIPs, nominee presence, profile completeness. Deliberately not investment advice; see [why it's rule-based, not AI](./docs/PROJECT_DOCUMENTATION.md#dynamic-vs-rule-based-features).
+A rule-based score summarizing account health — KYC status, active SIPs, nominee presence, profile completeness. Deliberately not investment advice.
 
 **Guided Resolution Assistant**
 A deterministic decision-tree flow (e.g. "My SIP failed → was your bank account changed?") that resolves common issues before an investor needs to raise a support ticket. Honestly named — no LLM involved.
@@ -162,7 +162,7 @@ flowchart TB
     B --> F[Health Score / Insights Service]
 ```
 
-Full system architecture, the event-driven recompute flow, and every sequence diagram: **[Architecture Overview →](./docs/PROJECT_DOCUMENTATION.md#system-architecture)**
+Full system architecture and the event-driven recompute flow: **[Architecture Overview →](./docs/PROJECT_DOCUMENTATION.md#system-architecture)**
 
 ---
 
@@ -259,7 +259,7 @@ No. InvestEase is a demo/portfolio project — all investment, NAV, and bank dat
 <details>
 <summary><strong>Does the Investor Health Score use AI?</strong></summary>
 
-No — it's a transparent, rule-based score. See [why that was a deliberate choice](./docs/PROJECT_DOCUMENTATION.md#dynamic-vs-rule-based-features).
+No — it's a transparent, rule-based score.
 </details>
 
 <details>
