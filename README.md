@@ -285,14 +285,6 @@ Yes — it's MIT licensed. See [Contributing](#contributing) if you'd like to su
 
 ---
 
-## License
-
-Licensed under the [MIT License](./LICENSE).
-
-## Acknowledgements
-
-[React](https://react.dev/) · [Tailwind CSS](https://tailwindcss.com/) · [Recharts](https://recharts.org/) · [MongoDB Atlas](https://www.mongodb.com/atlas) · [PDFKit](https://pdfkit.org/)
-
 ## Developer
 
 **Darshan Parmar**
