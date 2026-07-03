@@ -3,11 +3,8 @@
 <!-- Replace with an actual banner image, e.g. docs/banner.png -->
 <img src="./docs/banner.png" alt="InvestEase banner" width="100%" />
 
-# InvestEase
 
-**A full-stack investor self-service platform built on the MERN stack**
-
-InvestEase lets investors manage their portfolio, SIPs, KYC, nominees, statements, and support requests from a single dashboard — and gives administrators the tools to review KYC and resolve support tickets without a separate backend tool.
+**A self-service platform where investors manage their entire account - portfolio, SIPs, KYC, nominees, statements, support - and administrators handle verification and ticket resolution from the same system.**
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)

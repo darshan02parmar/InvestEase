@@ -323,12 +323,10 @@ Deployment order: provision the Atlas cluster → deploy the backend to Render �
 |---|---|
 | ![KYC](../client/public/Screenshots/KYC.png) | ![Admin dashboard](../client/public/Screenshots/Admin.png) |
 
-<!-- Extended screenshot set — replace placeholders -->
-
 | Nominee | Statements |
 |---|---|
-| ![Nominee](./screenshots/nominee.png) | ![Statements](./screenshots/statements.png) |
+| ![Nominee](../client/public/Screenshots/Nominee.png) | ![Statements](../client/public/Screenshots/Statements.png) |
 
 | Notifications | Support |
 |---|---|
-| ![Notifications](./screenshots/notifications.png) | ![Support](./screenshots/support.png) |
+| ![Notifications](../client/public/Screenshots/Notifications.png) | ![Support](../client/public/Screenshots/Support.png) |
