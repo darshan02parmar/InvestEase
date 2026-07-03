@@ -57,7 +57,7 @@ For the deep technical reference — full API docs, complete schema, and archite
 
 | | |
 |---|---|
-| **Frontend** | [`https://invest-ease-sand.vercel.app/`  |
+| **Frontend** | `https://invest-ease-sand.vercel.app/`  |
 | **Backend API** | `https://investease-mb3q.onrender.com` |
 
 <details>
