@@ -100,7 +100,7 @@ Password: Admin@123
 |---|---|
 | ![KYC](./client/public/Screenshots/KYC.png) | ![Admin dashboard](./client/public/Screenshots/Admin.png) |
 
-<div align="right"><a href="./docs/PROJECT_DOCUMENTATION.md#screenshots">More screenshots →</a></div>
+
 
 ---
 
@@ -296,4 +296,9 @@ Licensed under the [MIT License](./LICENSE).
 ## Developer
 
 **Darshan Parmar**
-[GitHub](https://github.com/darshan02parmar) · [LinkedIn](https://linkedin.com/in/darshanparmar) · `darshan@example.com`
+[GitHub](https://github.com/darshan02parmar)
+
+**Pankti Parmar**
+[GitHub](https://github.com/Pankti2312)
+
+
