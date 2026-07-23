@@ -280,14 +280,4 @@ Yes — it's MIT licensed. See [Contributing](#contributing) if you'd like to su
 3. Commit with a clear message
 4. Open a pull request describing what changed and why
 
----
-
-## Developer
-
-**Darshan Parmar**
-[GitHub](https://github.com/darshan02parmar)
-
-**Pankti Parmar**
-[GitHub](https://github.com/Pankti2312)
-
 
